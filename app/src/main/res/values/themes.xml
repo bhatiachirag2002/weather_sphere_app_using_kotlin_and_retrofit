@@ -1,0 +1,65 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Base.Theme.WeatherSphere" parent="Theme.Material3.Light.NoActionBar">
+        <!-- Customize your light theme here. -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <style name="Theme.WeatherSphere" parent="Base.Theme.WeatherSphere" />
+
+<style name="current_weather_box_outer_linear_layout" parent="Base.Theme.WeatherSphere">
+    <item name="android:layout_width">match_parent</item>
+    <item name="android:layout_height">wrap_content</item>
+    <item name="android:orientation">horizontal</item>
+    <item name="android:gravity">center</item>
+</style>
+
+<!--    Current Weather-->
+    <style name="current_weather_box_image_view" parent="Base.Theme.WeatherSphere">
+        <item name="android:layout_width">@dimen/_40sdp</item>
+        <item name="android:layout_height">@dimen/_40sdp</item>
+        <item name="android:layout_marginEnd">@dimen/_2sdp</item>
+    </style>
+
+    <style name="current_weather_box_txt_linear_layout" parent="Base.Theme.WeatherSphere">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="current_weather_box_txt_heading" parent="Base.Theme.WeatherSphere">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/chivo_medium</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/_15ssp</item>
+    </style>
+
+    <style name="current_weather_box_txt_result" parent="current_weather_box_txt_heading">
+        <item name="android:textSize">@dimen/_13ssp</item>
+    </style>
+
+
+<!--daily Weather-->
+
+    <style name="daily_weather_box_image_view" parent="Base.Theme.WeatherSphere">
+        <item name="android:layout_width">@dimen/_35sdp</item>
+        <item name="android:layout_height">@dimen/_35sdp</item>
+        <item name="android:layout_marginEnd">@dimen/_1sdp</item>
+    </style>
+
+    <style name="daily_weather_box_txt_heading" parent="Base.Theme.WeatherSphere">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:fontFamily">@font/chivo_medium</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/_14ssp</item>
+    </style>
+
+    <style name="daily_weather_box_txt_result" parent="current_weather_box_txt_heading">
+        <item name="android:textSize">@dimen/_12ssp</item>
+    </style>
+
+
+</resources>
