@@ -57,38 +57,29 @@ class DailyWeatherAdapter(private val dailyWeatherList: List<Daily>) :
     @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: DailyWeatherViewHolder, position: Int) {
         val dailyWeather = dailyWeatherList[position]
-
         // Set day text
-        holder.itemBinding.dayTxtView.text = convertUnixToDay(dailyWeather.dt)
+        when (position) {
+            0 -> {
+                holder.itemBinding.dayTxtView.text = "Today"
+            }
+            1 -> {
+                holder.itemBinding.dayTxtView.text = "Tomorrow"
+            }
+            else -> {
+                holder.itemBinding.dayTxtView.text = convertUnixToDay(dailyWeather.dt)
+            }
+        }
+
         // Set max and min temperatures
         holder.itemBinding.maxTxtView.text = "${dailyWeather.temp.max.toInt()}°C"
         holder.itemBinding.minTxtView.text = "${dailyWeather.temp.min.toInt()}°C"
         // Set weather icon
         setWeatherIcon(holder, dailyWeather.weather[0].icon)
         // Set weather description
-        holder.itemBinding.descriptionTxt.text = dailyWeather.weather[0].description
-        // Set sunrise and sunset times
-        holder.itemBinding.sunsetTimeTxtView.text = convertUnixToTime(dailyWeather.sunset)
-        holder.itemBinding.sunriseTimeTxtView.text = convertUnixToTime(dailyWeather.sunrise)
-        // Set other weather details
-        holder.itemBinding.cloudsPercentageTxtView.text = "${dailyWeather.clouds}%"
-        holder.itemBinding.windSpeedTxtView.text = "${dailyWeather.wind_speed} m/s"
-        holder.itemBinding.humidityPercentageTxtView.text = "${dailyWeather.humidity}%"
-        holder.itemBinding.rainTxtView.text = "${dailyWeather.rain}%"
+        if(dailyWeather.weather[0].description == "scattered clouds"){
+            holder.itemBinding.descriptionTxt.text = "cloudy"
+        } else holder.itemBinding.descriptionTxt.text = dailyWeather.weather[0].description
     }
-
-    /**
-     * Converts Unix time to a human-readable time format (hh:mm a).
-     *
-     * @param time The Unix time to be converted.
-     * @return A formatted time string.
-     */
-    private fun convertUnixToTime(time: Int): String {
-        val date = Date(time * 1000L) // Convert Unix time to milliseconds
-        val format = java.text.SimpleDateFormat("hh:mm a", Locale.getDefault())
-        return format.format(date)
-    }
-
     /**
      * Converts Unix time to a human-readable day format (E).
      *

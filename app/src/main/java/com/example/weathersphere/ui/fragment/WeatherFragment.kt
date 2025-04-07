@@ -73,7 +73,9 @@ class WeatherFragment : Fragment() {
                 binding.dayAndDateTxtView.text = convertUnixToDayAndDate(it.current.dt)
                 setWeatherIcon(it.current.weather[0].icon)
                 binding.currentWeatherTempTxtView.text = "${it.current.temp.toInt()}°C"
-                binding.currentWeatherDescTxtView.text = it.current.weather[0].description
+                if(it.current.weather[0].description == "scattered clouds"){
+                    binding.currentWeatherDescTxtView.text = "cloudy"
+                } else {binding.currentWeatherDescTxtView.text = it.current.weather[0].description}
                 binding.sunriseTimeTxtView.text = convertUnixToTime(it.current.sunrise)
                 binding.sunsetTimeTxtView.text = convertUnixToTime(it.current.sunset)
                 binding.cloudsPercentageTxtView.text = "${it.current.clouds}%"
@@ -84,7 +86,7 @@ class WeatherFragment : Fragment() {
                 binding.pressureTxtView.text = "${it.daily[0].rain}%"
 
                 // Setup adapters for hourly and daily weather data
-                setupWeatherAdapters(it.hourly, it.daily.subList(1, it.daily.size))
+                setupWeatherAdapters(it.hourly, it.daily)
             }
         }
     }
@@ -95,7 +97,7 @@ class WeatherFragment : Fragment() {
         binding.hourlyRecyclerView.adapter = HourlyWeatherAdapter(hourlyWeatherList)
 
         // Set up the daily weather RecyclerView
-        binding.dailyRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.dailyRecyclerView.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.dailyRecyclerView.adapter = DailyWeatherAdapter(dailyWeatherList)
     }
 

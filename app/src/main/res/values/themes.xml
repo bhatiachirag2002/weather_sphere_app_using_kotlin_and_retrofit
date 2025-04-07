@@ -16,14 +16,14 @@
 
 <!--    Current Weather-->
     <style name="current_weather_box_image_view" parent="Base.Theme.WeatherSphere">
-        <item name="android:layout_width">@dimen/_40sdp</item>
-        <item name="android:layout_height">@dimen/_40sdp</item>
-        <item name="android:layout_marginEnd">@dimen/_2sdp</item>
+        <item name="android:layout_width">@dimen/_20sdp</item>
+        <item name="android:layout_height">@dimen/_20sdp</item>
+        <item name="android:layout_marginEnd">@dimen/_5sdp</item>
     </style>
 
     <style name="current_weather_box_txt_linear_layout" parent="Base.Theme.WeatherSphere">
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
         <item name="android:orientation">vertical</item>
     </style>
@@ -33,11 +33,11 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:fontFamily">@font/chivo_medium</item>
         <item name="android:textColor">@color/white</item>
-        <item name="android:textSize">@dimen/_15ssp</item>
+        <item name="android:textSize">@dimen/_10ssp</item>
     </style>
 
     <style name="current_weather_box_txt_result" parent="current_weather_box_txt_heading">
-        <item name="android:textSize">@dimen/_13ssp</item>
+        <item name="android:textSize">@dimen/_9ssp</item>
     </style>
 
 

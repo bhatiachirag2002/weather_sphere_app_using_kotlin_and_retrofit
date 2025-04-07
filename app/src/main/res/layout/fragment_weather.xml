@@ -27,7 +27,7 @@
                 android:maxLines="1"
                 android:text="Faridabad, Haryana"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_15ssp"
+                android:textSize="@dimen/_13ssp"
                 android:textStyle="bold" />
 
             <TextView
@@ -39,13 +39,13 @@
                 android:letterSpacing="0.01"
                 android:text="Day &amp; Date"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_13ssp"
+                android:textSize="@dimen/_11ssp"
                 android:textStyle="bold" />
 
             <ImageView
                 android:id="@+id/current_weather_icons_ImgView"
-                android:layout_width="@dimen/_150sdp"
-                android:layout_height="@dimen/_150sdp"
+                android:layout_width="@dimen/_130sdp"
+                android:layout_height="@dimen/_130sdp"
                 android:layout_marginTop="@dimen/_10sdp"
                 android:src="@drawable/weather_app" />
 
@@ -57,7 +57,7 @@
                 android:fontFamily="@font/roboto_medium"
                 android:text="14°C"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_45ssp"
+                android:textSize="@dimen/_40ssp"
                 android:textStyle="bold" />
 
             <TextView
@@ -67,7 +67,7 @@
                 android:fontFamily="@font/chivo_medium"
                 android:text="Description"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_15ssp"
+                android:textSize="@dimen/_13ssp"
                 android:textStyle="bold" />
 
             <LinearLayout
@@ -79,6 +79,10 @@
                 android:orientation="horizontal"
                 android:paddingVertical="@dimen/_10sdp"
                 android:paddingHorizontal="@dimen/_8sdp">
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -262,6 +266,10 @@
                         </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
             </LinearLayout>
             
             <TextView
@@ -273,7 +281,7 @@
                 android:layout_gravity="start"
                 android:text="24-hour forecast"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_16ssp"
+                android:textSize="@dimen/_12ssp"
                 android:fontFamily="@font/roboto_medium"
                 />
             <androidx.recyclerview.widget.RecyclerView
@@ -295,19 +303,20 @@
                 android:layout_gravity="start"
                 android:text="7-day forecast"
                 android:textColor="@color/white"
-                android:textSize="@dimen/_16ssp"
+                android:textSize="@dimen/_12ssp"
                 android:fontFamily="@font/roboto_medium"
                 />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/daily_RecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="@dimen/_135sdp"
                 android:background="@drawable/white_border"
-                android:layout_marginHorizontal="@dimen/_5sdp"
                 android:paddingVertical="@dimen/_7sdp"
                 android:paddingHorizontal="@dimen/_5sdp"
                 android:orientation="horizontal"
-                android:layout_margin="@dimen/_10sdp"/>
+                android:layout_marginHorizontal="@dimen/_5sdp"
+                android:layout_marginBottom="@dimen/_10sdp"/>
         </LinearLayout>
 
     </ScrollView>
