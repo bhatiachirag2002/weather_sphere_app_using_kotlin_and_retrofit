@@ -10,7 +10,7 @@ package com.example.weathersphere.util
 object ApiKey {
 
     // Replace this with your actual OpenWeatherMap API key
-    const val WEATHER_API_KEY = "5414ef8d990e8fa9683deb637e2d3f14"
+    const val WEATHER_API_KEY = "API_KEY"
 }
 
 
