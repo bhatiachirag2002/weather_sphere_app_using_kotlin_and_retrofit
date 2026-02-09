@@ -9,6 +9,7 @@ import com.example.weathersphere.R
 import com.example.weathersphere.api.ApiInterface
 import com.example.weathersphere.api.ApiUtilities
 import com.example.weathersphere.repo.AppRepo
+import com.example.weathersphere.util.RemoteConfigManager
 import com.example.weathersphere.viewmodel.AppViewModel
 import com.example.weathersphere.viewmodel.AppViewModelFactory
 
@@ -24,8 +25,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         enableEdgeToEdge()
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
-        // Setup ViewModel
-        setupViewModel()
+
+        // Fetch Remote Config values first
+        RemoteConfigManager.fetchAndActivate {
+            // Setup ViewModel after config is fetched
+            setupViewModel()
+        }
     }
 
     /**
@@ -43,5 +48,8 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize the ViewModel using the factory
         appViewModel = ViewModelProvider(this, viewModelFactory)[AppViewModel::class.java]
+
+        // Note: Yahan aap weather data fetch karne ka logic call kar sakte hain
+        // kyunki ab API key update ho chuki hai.
     }
 }
