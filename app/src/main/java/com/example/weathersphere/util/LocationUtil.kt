@@ -1,23 +1,21 @@
 package com.example.weathersphere.util
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.os.Looper
 import androidx.activity.result.ActivityResultLauncher
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.Priority
 import java.util.*
 
-/**
- * Utility class for managing location services such as checking permissions,
- * fetching the user's current location, and getting an address from a location.
- *
- * @param context The application context.
- * @param fusedLocationClient The client used to access location services.
- * @param requestPermissionLauncher Launcher for requesting location permissions.
- */
 @Suppress("DEPRECATION")
 class LocationUtil(
     private val context: Context,
@@ -25,56 +23,60 @@ class LocationUtil(
     private val requestPermissionLauncher: ActivityResultLauncher<String>
 ) {
 
-    /**
-     * Checks if the app has the necessary location permission (ACCESS_FINE_LOCATION).
-     *
-     * @return Boolean indicating if location permission is granted.
-     */
     fun hasLocationPermission(): Boolean {
         return ActivityCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    /**
-     * Fetches the user's current location if location permission is granted.
-     * If permission is not granted, it triggers the permission request.
-     *
-     * @param onLocationFetched Callback function to handle the fetched location.
-     */
+    @SuppressLint("MissingPermission")
     fun getCurrentLocation(onLocationFetched: (Location?) -> Unit) {
-        // If permission is not granted, request it
         if (!hasLocationPermission()) {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         } else {
-            // Try to fetch the last known location
-            try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            // Pehle last location try karo
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                if (location != null) {
                     onLocationFetched(location)
+                } else {
+                    // Agar last location null hai, to fresh location request karo
+                    requestFreshLocation(onLocationFetched)
                 }
-            } catch (e: SecurityException) {
-                // Handle any security exception, return null if location cannot be fetched
-                onLocationFetched(null)
+            }.addOnFailureListener {
+                requestFreshLocation(onLocationFetched)
             }
         }
     }
 
-    /**
-     * Converts a Location object to a human-readable address using Geocoder.
-     *
-     * @param location The location for which the address is fetched.
-     * @return A formatted address string or "N/A" if no address is found.
-     */
-    fun getAddressFromLocation(location: Location): String {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        val address = geocoder.getFromLocation(
-            location.latitude, location.longitude, 1
-        )?.firstOrNull()
+    @SuppressLint("MissingPermission")
+    private fun requestFreshLocation(onLocationFetched: (Location?) -> Unit) {
+        val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 1000)
+            .setMaxUpdates(1) // Sirf ek baar location chahiye
+            .build()
 
-        // Return the formatted address or "N/A" if no address is available
-        return if (address != null) {
-            "${address.locality}, ${address.subLocality}, ${address.adminArea}"
-        } else {
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                val location = locationResult.lastLocation
+                onLocationFetched(location)
+                fusedLocationClient.removeLocationUpdates(this)
+            }
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback,
+            Looper.getMainLooper()
+        )
+    }
+
+    fun getAddressFromLocation(location: Location): String {
+        return try {
+            val geocoder = Geocoder(context, Locale.getDefault())
+            val address = geocoder.getFromLocation(location.latitude, location.longitude, 1)?.firstOrNull()
+            if (address != null) {
+                "${address.locality ?: ""}, ${address.subLocality ?: ""}, ${address.adminArea ?: ""}"
+            } else "N/A"
+        } catch (e: Exception) {
             "N/A"
         }
     }

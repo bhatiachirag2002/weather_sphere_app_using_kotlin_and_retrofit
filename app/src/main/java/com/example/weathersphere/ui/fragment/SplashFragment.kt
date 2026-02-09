@@ -3,9 +3,11 @@ package com.example.weathersphere.ui.fragment
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -13,22 +15,27 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.weathersphere.R
+import com.example.weathersphere.api.ApiInterface
+import com.example.weathersphere.api.ApiUtilities
 import com.example.weathersphere.databinding.FragmentSplashBinding
+import com.example.weathersphere.repo.AppRepo
+import com.example.weathersphere.util.ApiKey
 import com.example.weathersphere.util.LocationUtil
 import com.example.weathersphere.util.NetworkUtil
+import com.example.weathersphere.util.RemoteConfigManager
 import com.example.weathersphere.viewmodel.AppViewModel
+import com.example.weathersphere.viewmodel.AppViewModelFactory
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 
-/**
- * SplashFragment displays a splash screen while checking for internet connectivity and location permissions.
- */
 class SplashFragment : Fragment() {
 
     private lateinit var binding: FragmentSplashBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationUtil: LocationUtil
     private lateinit var viewModel: AppViewModel
+
+    private val TAG = "wetherDebugs"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -40,67 +47,76 @@ class SplashFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Adjust content for insets (like status bar)
         ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
             val statusBarHeight = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
             v.setPadding(0, statusBarHeight, 0, 0)
             insets
         }
 
-        // Initialize ViewModel and Location utilities
-        viewModel = ViewModelProvider(requireActivity())[AppViewModel::class.java]
+        val apiInterface = ApiUtilities.getInstance().create(ApiInterface::class.java)
+        val appRepo = AppRepo(apiInterface)
+        val viewModelFactory = AppViewModelFactory(appRepo)
+        viewModel = ViewModelProvider(requireActivity(), viewModelFactory)[AppViewModel::class.java]
+        
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         locationUtil = LocationUtil(requireActivity(), fusedLocationClient, requestPermissionLauncher)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            checkInternetConnection()
-        }, 2000)
-
+        // Step 1: Remote Config se Key fetch karte hain
+        Log.d(TAG, "Step 1: Fetching Remote Config...")
+        RemoteConfigManager.fetchAndActivate {
+            Log.d(TAG, "Step 2: Key received: ${ApiKey.WEATHER_API_KEY}")
+            
+            Handler(Looper.getMainLooper()).postDelayed({
+                checkInternetConnection()
+            }, 1000)
+        }
     }
 
-    /**
-     * Checks if the internet is available. If not, navigates to an error fragment.
-     */
     private fun checkInternetConnection() {
         if (NetworkUtil.isInternetAvailable(requireContext())) {
+            Log.d(TAG, "Step 3: Internet Available. Getting Location...")
             getCurrentLocation()
         } else {
+            Log.e(TAG, "Error: No Internet Connection")
             navigateToErrorFragment("No Internet", "Check your internet connection.")
             checkInternetConnectionPeriodically()
         }
     }
 
-    /**
-     * Retrieves the current location using LocationUtil and fetches weather data.
-     */
     private fun getCurrentLocation() {
         locationUtil.getCurrentLocation { location ->
-            location?.let {
-                val address = locationUtil.getAddressFromLocation(it)
+            if (location != null) {
+                Log.d(TAG, "Step 4: Location Found -> Lat: ${location.latitude}, Lon: ${location.longitude}")
+                
+                val address = locationUtil.getAddressFromLocation(location)
+                Log.d(TAG, "Step 5: Address fetched: $address")
+
                 val addressParts = address.split(", ")
                 val locality = addressParts.getOrNull(0) ?: "N/A"
                 val adminArea = addressParts.getOrNull(2) ?: "N/A"
 
-                // Fetch weather data using ViewModel
-                viewModel.fetchWeather(it.latitude, it.longitude)
+                Log.d(TAG, "Step 6: Fetching Weather for $locality using key: ${ApiKey.WEATHER_API_KEY}")
+                viewModel.fetchWeather(location.latitude, location.longitude)
 
-                // Observe weather data and navigate to the WeatherFragment
                 viewModel.weather.observe(viewLifecycleOwner) { weatherData ->
                     if (weatherData != null) {
+                        Log.d(TAG, "Step 7: Weather Data Received for: ${weatherData.lat} , ${weatherData.lon}")
                         val bundle = Bundle().apply {
                             putString("locality", locality)
                             putString("adminArea", adminArea)
                         }
                         findNavController().navigate(R.id.action_splashFragment_to_weatherFragment, bundle)
+                    } else {
+                        Log.e(TAG, "Step 7 Error: Weather Data is NULL (Check API Key activation or validity)")
                     }
                 }
+            } else {
+                Log.e(TAG, "Error: Location is NULL even after request")
+                Toast.makeText(requireContext(), "Unable to get location. Please check GPS.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    /**
-     * Navigates to an error fragment with the provided title and message.
-     */
     private fun navigateToErrorFragment(title: String, message: String) {
         val bundle = Bundle().apply {
             putString("title", title)
@@ -109,41 +125,36 @@ class SplashFragment : Fragment() {
         findNavController().navigate(R.id.errorFragment, bundle)
     }
 
-    // Request permission launcher for location access
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+            Log.d(TAG, "Permission Result: $isGranted")
             if (isGranted) {
-                getCurrentLocation() // Get the current location if permission is granted
+                getCurrentLocation()
             } else {
                 navigateToErrorFragment("Location Permission", "This app requires location access.")
                 checkLocationPermissionPeriodically()
             }
         }
 
-    /**
-     * Periodically checks for internet connection availability.
-     */
     private fun checkInternetConnectionPeriodically() {
         Handler(Looper.getMainLooper()).postDelayed({
             if (NetworkUtil.isInternetAvailable(requireContext())) {
-                findNavController().popBackStack() // Dismiss error dialog
+                findNavController().popBackStack()
+                checkInternetConnection()
             } else {
-                checkInternetConnectionPeriodically() // Continue checking
+                checkInternetConnectionPeriodically()
             }
-        }, 1000)
+        }, 2000)
     }
 
-    /**
-     * Periodically checks if the location permission is granted.
-     */
     private fun checkLocationPermissionPeriodically() {
         Handler(Looper.getMainLooper()).postDelayed({
             if (locationUtil.hasLocationPermission()) {
-                findNavController().popBackStack() // Dismiss error dialog
-                getCurrentLocation() // Get current location
+                findNavController().popBackStack()
+                getCurrentLocation()
             } else {
-                checkLocationPermissionPeriodically() // Continue checking
+                checkLocationPermissionPeriodically()
             }
-        }, 1000)
+        }, 2000)
     }
 }
